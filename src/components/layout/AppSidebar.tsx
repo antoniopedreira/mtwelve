@@ -1,89 +1,110 @@
-import { LayoutDashboard, Users, Wallet, Settings, Menu } from "lucide-react";
-import { NavLink } from "../NavLink";
-import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/use-mobile"; // CORREÇÃO: Nome correto do hook
+import { LayoutDashboard, Users, Wallet, Settings, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 export function AppSidebar() {
-  const isMobile = useIsMobile(); // CORREÇÃO: Uso correto do hook
-  const [isOpen, setIsOpen] = useState(false);
+  const { state, toggleSidebar } = useSidebar();
+  const location = useLocation();
+  const isCollapsed = state === "collapsed";
 
-  const LOGO_URL =
-    "https://ychhgfsavlnoyjvfpdxa.supabase.co/storage/v1/object/public/logos&templates/0716753f-3c3e-45c8-b90d-64c04940d4b7.png";
+  const LOGO_ICON_URL =
+    "https://ychhgfsavlnoyjvfpdxa.supabase.co/storage/v1/object/public/logos&templates/image-removebg-preview%20(1).png";
 
-  // Estilos centralizados para facilitar manutenção
-  const baseLinkStyles =
-    "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group text-muted-foreground hover:bg-accent hover:text-foreground";
-  const activeLinkStyles = "bg-primary/10 text-primary font-medium";
+  const menuItems = [
+    { title: "Dashboard", url: "/", icon: LayoutDashboard },
+    { title: "CRM", url: "/crm", icon: Users },
+    { title: "Financeiro", url: "/financeiro", icon: Wallet },
+    { title: "Settings", url: "/settings", icon: Settings },
+  ];
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-card border-r border-border/50">
-      <div className="p-6">
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-8">
-          <img src={LOGO_URL} alt="MTwelve Sports" className="h-10 w-auto object-contain" />
+  return (
+    <Sidebar collapsible="icon" className="border-r border-border/50 bg-card">
+      <SidebarHeader className="h-16 flex flex-row items-center justify-between px-4 py-4">
+        {/* Area da Logo */}
+        <div className={cn("flex items-center gap-2 transition-all", isCollapsed ? "justify-center w-full" : "")}>
+          <img src={LOGO_ICON_URL} alt="MTwelve Logo" className="h-8 w-8 object-contain" />
+
+          {!isCollapsed && (
+            <span className="font-bold text-lg tracking-tight text-foreground whitespace-nowrap animate-in fade-in duration-300">
+              MTwelve
+            </span>
+          )}
         </div>
 
-        {/* Navegação - CORREÇÃO: Ícones passados como children, não props */}
-        <nav className="space-y-2">
-          <NavLink to="/" className={baseLinkStyles} activeClassName={activeLinkStyles}>
-            <LayoutDashboard size={20} />
-            <span>Dashboard</span>
-          </NavLink>
+        {/* Botão de Minimizar/Maximizar (Aparece apenas quando aberto para fechar) */}
+        {!isCollapsed && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="h-6 w-6 text-muted-foreground hover:text-primary ml-auto"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
+        )}
+      </SidebarHeader>
 
-          <NavLink to="/crm" className={baseLinkStyles} activeClassName={activeLinkStyles}>
-            <Users size={20} />
-            <span>CRM</span>
-          </NavLink>
+      <SidebarContent className="px-2 py-4">
+        <SidebarMenu>
+          {menuItems.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.title}
+                isActive={location.pathname === item.url}
+                className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary hover:bg-accent hover:text-accent-foreground transition-all duration-200"
+              >
+                <NavLink to={item.url}>
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.title}</span>
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
 
-          <NavLink to="/financeiro" className={baseLinkStyles} activeClassName={activeLinkStyles}>
-            <Wallet size={20} />
-            <span>Financeiro</span>
-          </NavLink>
+      <SidebarFooter className="p-4">
+        {/* Botão para abrir quando estiver fechado (opcional, ou usa o trigger global) */}
+        {isCollapsed && (
+          <div className="flex justify-center mb-4">
+            <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-6 w-6 text-muted-foreground">
+              <PanelLeftOpen className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
-          <NavLink to="/settings" className={baseLinkStyles} activeClassName={activeLinkStyles}>
-            <Settings size={20} />
-            <span>Settings</span>
-          </NavLink>
-        </nav>
-      </div>
-
-      {/* Footer / User Profile */}
-      <div className="mt-auto p-6 border-t border-border/50">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors cursor-pointer">
-          <Avatar className="h-9 w-9 border border-primary/20">
+        <div
+          className={cn(
+            "flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent",
+            isCollapsed && "justify-center px-0",
+          )}
+        >
+          <Avatar className="h-8 w-8 border border-primary/20">
             <AvatarImage src="https://github.com/shadcn.png" />
             <AvatarFallback>JM</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">João Martins</span>
-            <span className="text-xs text-muted-foreground">Agente Senior</span>
-          </div>
+
+          {!isCollapsed && (
+            <div className="flex flex-col overflow-hidden animate-in fade-in duration-300">
+              <span className="text-sm font-medium truncate">João Martins</span>
+              <span className="text-xs text-muted-foreground truncate">Agente Senior</span>
+            </div>
+          )}
         </div>
-      </div>
-    </div>
-  );
-
-  if (isMobile) {
-    return (
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden fixed top-4 left-4 z-50">
-            <Menu />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="p-0 w-72 bg-card border-r border-border/50">
-          <SidebarContent />
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
-  return (
-    <div className="hidden md:block w-64 h-screen sticky top-0 bg-background">
-      <SidebarContent />
-    </div>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
