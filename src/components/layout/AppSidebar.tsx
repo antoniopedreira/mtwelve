@@ -18,9 +18,9 @@ export function AppSidebar() {
   const location = useLocation();
   const isCollapsed = state === "collapsed";
 
-  // URL da Logo Oficial (Simbolo Dourado)
+  // URL da Logo Atualizada (Versão 2)
   const LOGO_URL =
-    "https://ychhgfsavlnoyjvfpdxa.supabase.co/storage/v1/object/public/logos&templates/image-removebg-preview%20(1).png";
+    "https://ychhgfsavlnoyjvfpdxa.supabase.co/storage/v1/object/public/logos&templates/image-removebg-preview%20(2).png";
 
   const menuItems = [
     { title: "Dashboard", url: "/", icon: LayoutDashboard },
